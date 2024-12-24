@@ -10,7 +10,8 @@ from model import AnalyzeDocs
 def read_pdf(file_path):
     reader = PdfReader(file_path)
     print("Num pages: ", len(reader.pages))
-    return reader.pages[0].extract_text()
+    pagina = reader.pages[1]
+    return pagina.extract_text()
 
 
 def read_text(file: str) -> str:
@@ -19,6 +20,8 @@ def read_text(file: str) -> str:
     
 
 def main():
+    # text = read_pdf("../data/wwi_russia.pdf")
+    # print(text)
     analyze = AnalyzeDocs()
     text = read_text("../data/sample_text.txt")
     flash_cards = analyze.process_document(text)

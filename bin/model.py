@@ -1,28 +1,92 @@
 import os
 import json
-from typing import List, Dict
-
+from typing import List, Dict, Optional
+from dataclasses import dataclass
 from groq import Groq
 
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+@dataclass
+class FlashCard:
+    prompt: str
+    answer: str
+    category: Optional[str] = None
+    difficulty: Optional[str] = None
 
 
 class AnalyzeDocs:
-    def __init__(self, target_language="english"):
-        self.target_language = target_language
-        self.client_groq = Groq(api_key=GROQ_API_KEY)
+    def __init__(self, target_language="english", model="llama-3.1-8b-instant"):
+        self.target_language = target_language.lower()
+        self.model = model
+        self.client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        if not os.getenv("GROQ_API_KEY"):
+            raise ValueError("GROQ_API_KEY environment variable not set")
 
-    def generate_with_groq(self, messages: List[Dict[str, str]]) -> str:
-        completion = self.client_groq.chat.completions.create(
-            messages=messages,
-            model="llama-3.1-8b-instant",
-            temperature=0.7,
-        )
-        return completion.choices[0].message.content
+    def generate_with_groq(self, messages: List[Dict[str, str]], retry_count=3) -> str:
+        """Generate content using the GROQ API with retry logic.
+        
+        Args:
+            messages (List[Dict[str, str]]): A list of messages to send to the API.
+            retry_count (int): The number of times to retry the request.
+        
+        Returns:
+            str: The generated content.
+        """
+        for attempt in range(retry_count):
+            try:
+                completion = self.client_groq.chat.completions.create(
+                    messages=messages,
+                    model=self.model,
+                    temperature=0.7,
+                )
+                return completion.choices[0].message.content
+            except Exception as e:
+                if attempt == retry_count - 1:
+                    raise Exception(f"Failed to generate content after {retry_count} attempts: {str(e)}")
+                continue
+
+    def extract_key_concepts(self, text: str) -> List[str]:
+        """Extract key concepts and terminology from the text.
+        
+        Args:
+            text (str): The text content to analyze.
+            
+        Returns:
+            List[str]: A list of key concepts and terminology.
+        """
+        messages = [
+            {"role": "system", "content": "Extract key concepts and terminology from the text. Return as JSON array."},
+            {"role": "user", "content": text}
+        ]
+        response = self.generate_with_groq(messages)
+        try:
+            return json.loads(response)
+        except json.JSONDecodeError:
+            return []
+
+    def categorize_content(self, text: str) -> str:
+        """Determine the subject category of the content.
+        
+        Args:
+            text (str): The text content to categorize.
+        
+        Returns:
+            str: The category name.
+        """
+        messages = [
+            {"role": "system", "content": "Determine the main subject category (e.g., 'History', 'Science', 'Math'). Return only the category name."},
+            {"role": "user", "content": text}
+        ]
+        return self.generate_with_groq(messages)
     
     def summarize_text(self, text: str) -> str:
-        """Summarize long text into key points."""
+        """Summarize long text into key points.
+        
+        Args:
+            text (str): The text to summarize.
+        
+        Returns:
+            str: The summarized text.
+        """
         messages = [
             {"role": "system", "content": "Summarize the following text into key points."},
             {"role": "user", "content": text}
@@ -30,7 +94,14 @@ class AnalyzeDocs:
         return self.generate_with_groq(messages)
         
     def generate_qa_pairs(self, summary: str) -> List[Dict[str, str]]:
-        """Generate relevant Q&A pairs from the summary."""
+        """Generate relevant Q&A pairs from the summary.
+        
+        Args:
+            summary (str): The summary text.
+        
+        Returns:
+            List[Dict[str, str]]: A list of question-answer pairs.
+        """
         messages = [
             {"role": "system", "content": "Generate 3 relevant question-answer pairs from this text. Return as JSON array with 'question' and 'answer' fields."},
             {"role": "user", "content": summary}
@@ -48,7 +119,14 @@ class AnalyzeDocs:
             return []
         
     def translate_content(self, content: str) -> str:
-        """Translate content to target language."""
+        """Translate content to target language.
+        
+        Args:
+            content (str): The content to translate.
+        
+        Returns:
+            str: The translated content.
+        """
         if self.target_language.lower() == "english":
             return content
 
@@ -58,21 +136,59 @@ class AnalyzeDocs:
         ]
         return self.generate_with_groq(messages)
     
-    def process_document(self, text: str) -> List[Dict[str, str]]:
-        """Process entire document through the pipeline."""
-        summary = self.summarize_text(text)
+    def categorize_content(self, text: str) -> str:
+        """Determine the subject category of the content.
+        
+        Args:
+            text (str): The text content to categorize.
+        
+        Returns:
+            str: The category name.
+        """
+        messages = [
+            {"role": "system", "content": "Determine the main subject category (e.g., 'History', 'Science', 'Math'). Return only the category name."},
+            {"role": "user", "content": text}
+        ]
+        return self.generate_with_groq(messages)
 
-        qa_pairs = self.generate_qa_pairs(summary)
+    def process_document(self, text: str, num_cards: int = 3) -> List[FlashCard]:
+        """Process document and generate flash cards with difficulty levels and categories.
+        
+        Args:
+            text (str): The text content to process.
+            num_cards (int): The number of flash cards to generate.
+        
+        Returns:
+            List[FlashCard]: A list of FlashCard objects.
+        """
+        category = self.categorize_content(text)
+        summary = self.summarize_text(text)
+        key_concepts = self.extract_key_concepts(text)
+
+        messages = [
+            {"role": "system", "content": f"""Generate {num_cards} flash cards based on the following text. 
+            Focus on key concepts: {', '.join(key_concepts)}. 
+            Return as JSON array with fields: question, answer, difficulty (easy/medium/hard)"""},
+            {"role": "user", "content": summary}
+        ]
+        
+        response = self.generate_with_groq(messages)
+        try:
+            qa_pairs = json.loads(response)
+        except json.JSONDecodeError:
+            return []
 
         flash_cards = []
         for qa in qa_pairs:
             translated_q = self.translate_content(qa['question'])
             translated_a = self.translate_content(qa['answer'])
 
-            flash_card = {
-                "prompt": translated_q,
-                "answer": translated_a
-            }
-            flash_cards.append(flash_card)
+            card = FlashCard(
+                prompt=translated_q,
+                answer=translated_a,
+                category=category,
+                difficulty=qa.get('difficulty', 'medium')
+            )
+            flash_cards.append(card)
         
         return flash_cards
