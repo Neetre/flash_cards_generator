@@ -24,6 +24,7 @@ def main():
     # print(text)
     analyze = AnalyzeDocs()
     text = read_text("../data/sample_text.txt")
+    print(text)
     flash_cards = analyze.process_document(text)
     print(flash_cards)
 

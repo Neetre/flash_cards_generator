@@ -14,7 +14,7 @@ class FlashCard:
 
 
 class AnalyzeDocs:
-    def __init__(self, target_language="english", model="llama-3.1-8b-instant"):
+    def __init__(self, target_language="english", model="mixtral-8x7b-32768"):
         self.target_language = target_language.lower()
         self.model = model
         self.client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -58,6 +58,7 @@ class AnalyzeDocs:
             {"role": "user", "content": text}
         ]
         response = self.generate_with_groq(messages)
+        print(response)
         try:
             return json.loads(response)
         except json.JSONDecodeError:
@@ -76,7 +77,9 @@ class AnalyzeDocs:
             {"role": "system", "content": "Determine the main subject category (e.g., 'History', 'Science', 'Math'). Return only the category name."},
             {"role": "user", "content": text}
         ]
-        return self.generate_with_groq(messages)
+        response = self.generate_with_groq(messages)
+        print(response)
+        return response
     
     def summarize_text(self, text: str) -> str:
         """Summarize long text into key points.
@@ -91,7 +94,9 @@ class AnalyzeDocs:
             {"role": "system", "content": "Summarize the following text into key points."},
             {"role": "user", "content": text}
         ]
-        return self.generate_with_groq(messages)
+        response = self.generate_with_groq(messages)
+        print(response)
+        return response
         
     def generate_qa_pairs(self, summary: str) -> List[Dict[str, str]]:
         """Generate relevant Q&A pairs from the summary.
@@ -107,6 +112,7 @@ class AnalyzeDocs:
             {"role": "user", "content": summary}
         ]
         response = self.generate_with_groq(messages)
+        print(response)
         try:
             response = response.strip()
             if not response.startswith('['):
@@ -134,7 +140,8 @@ class AnalyzeDocs:
             {"role": "system", "content": f"Translate the following text to {self.target_language}, maintaining any technical terms appropriate for a school context."},
             {"role": "user", "content": content}
         ]
-        return self.generate_with_groq(messages)
+        result = self.generate_with_groq(messages)
+        return result
     
     def categorize_content(self, text: str) -> str:
         """Determine the subject category of the content.
@@ -149,7 +156,9 @@ class AnalyzeDocs:
             {"role": "system", "content": "Determine the main subject category (e.g., 'History', 'Science', 'Math'). Return only the category name."},
             {"role": "user", "content": text}
         ]
-        return self.generate_with_groq(messages)
+        result = self.generate_with_groq(messages)
+        print(result)
+        return result
 
     def process_document(self, text: str, num_cards: int = 3) -> List[FlashCard]:
         """Process document and generate flash cards with difficulty levels and categories.
@@ -173,22 +182,26 @@ class AnalyzeDocs:
         ]
         
         response = self.generate_with_groq(messages)
+        print(response)
         try:
             qa_pairs = json.loads(response)
         except json.JSONDecodeError:
             return []
 
         flash_cards = []
-        for qa in qa_pairs:
-            translated_q = self.translate_content(qa['question'])
-            translated_a = self.translate_content(qa['answer'])
+        try:
+            for qa in qa_pairs:
+                translated_q = self.translate_content(qa['question'])
+                translated_a = self.translate_content(qa['answer'])
 
-            card = FlashCard(
-                prompt=translated_q,
-                answer=translated_a,
-                category=category,
-                difficulty=qa.get('difficulty', 'medium')
-            )
-            flash_cards.append(card)
-        
+                card = FlashCard(
+                    prompt=translated_q,
+                    answer=translated_a,
+                    category=category,
+                    difficulty=qa.get('difficulty', 'medium')
+                )
+                flash_cards.append(card)
+        except Exception as e:
+            print(f"Error while creating flashcards: {e}")
+            return []
         return flash_cards
