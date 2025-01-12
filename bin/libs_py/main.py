@@ -1,9 +1,6 @@
 import json
 from pypdf import PdfReader
 
-from dotenv import load_dotenv
-load_dotenv()
-
 from model import AnalyzeDocs
 
 
