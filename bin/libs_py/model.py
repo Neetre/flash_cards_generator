@@ -4,6 +4,9 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 from groq import Groq
 from pypdf import PdfReader
+import pytesseract
+from pdf2image import convert_from_path
+import pytesseract
 
 
 @dataclass
@@ -253,7 +256,7 @@ The questions should be clear and the answers should be concise."""},
         Returns:
             List[FlashCard]: A list of FlashCard objects.
         """
-        self.target_language = language or self.target_language
+        self.target_language = language if language is not None else self.target_language
         cards = self.process_document(text, num_cards)
         if save_to:
             self.save_flashcards(cards, save_to)
@@ -298,7 +301,7 @@ class ReadDocs:
     def __init__(self, data_dir="input"):
         self.data_dir = data_dir
 
-    def read_pdf(self, file_path: str) -> str:
+    def read_pdf(self, file_path: str, lang: str = "eng") -> str:
         """Read text content from a PDF file.
         
         Args:
@@ -307,10 +310,11 @@ class ReadDocs:
         Returns:
             str: The text content of the PDF.
         """
-        reader = PdfReader(file_path)
+        images = convert_from_path(file_path)
+
         text = ""
-        for page in reader.pages:
-            text += page.extract_text()
+        for image in images:
+            text += pytesseract.image_to_string(image, lang=lang)
         return text
         
     def read_text(self, file_path: str) -> str:

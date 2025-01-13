@@ -1,38 +1,32 @@
 [
     {
-        "prompt": "What are some ethical and legal concerns raised by the use of facial recognition technology?",
-        "answer": "Concerns include potential discrimination, privacy violations, and lack of regulation consistency across jurisdictions.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
+        "prompt": "What type of government was Imperial Russia?",
+        "answer": "Imperial Russia was an autocratic empire.",
+        "category": "The main subject category of the content is History.",
         "difficulty": "easy"
     },
     {
-        "prompt": "What are two purposes of facial recognition technology?",
-        "answer": "Facial recognition technology can be used for surveillance and identification.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
-        "difficulty": "easy"
-    },
-    {
-        "prompt": "What are the risks of false positives and negatives in facial recognition technology?",
-        "answer": "False positives and negatives can have serious consequences, such as wrongful arrests or missed identification of dangerous individuals.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
+        "prompt": "Who were the main groups that initiated the Russian Revolution of February 1917?",
+        "answer": "The revolution was initiated by women workers and supported by soldiers, the proletariat, and the Soviet.",
+        "category": "The main subject category of the content is History.",
         "difficulty": "medium"
     },
     {
-        "prompt": "How can facial recognition technology be misused?",
-        "answer": "Facial recognition technology can be used to discriminate, violate individuals' privacy, and be used without accountability or consequences.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
+        "prompt": "What was the significance of Lenin's 'April Theses'?",
+        "answer": "Lenin's 'April Theses' aimed for the overthrow of the provisional government, marking a crucial turning point in the revolution.",
+        "category": "The main subject category of the content is History.",
         "difficulty": "medium"
     },
     {
-        "prompt": "What is needed around the use of facial recognition technology?",
-        "answer": "Clear regulations and guidelines, transparency, opt-out rights, and accountability are needed for the use of facial recognition technology.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
-        "difficulty": "medium"
+        "prompt": "What was the outcome of the October Revolution in 1917?",
+        "answer": "The October Revolution led by the Bolsheviks resulted in the establishment of the 'dictatorship of the proletariat', the CEKA, the Red Terror, and the Russian Civil War.",
+        "category": "The main subject category of the content is History.",
+        "difficulty": "hard"
     },
     {
-        "prompt": "What is a concern about the accuracy and bias of facial recognition technology?",
-        "answer": "Facial recognition technology has been found to have accuracy and bias issues, which can lead to misidentification and discrimination.",
-        "category": "I cannot directly determine the main subject category of the content from a PDF file just by knowing its file format. To do so, I would need to analyze the actual contents of the PDF, such as its text or images.\n\nHowever, I can give you a general idea of how you might go about determining the subject category of a PDF file:\n\n1. Open the PDF file in a PDF viewer or editor.\n2. Look for any headings, titles, or captions that might indicate the subject of the content.\n3. Check for any images, charts, or diagrams that relate to a particular subject.\n4. Read some of the text to get a sense of the content and its focus.\n5. Based on your analysis, categorize the content according to the subject categories I provided earlier.\n\nFor example, if the PDF contains a lot of historical facts, dates, and events, it might be classified as History. If it contains scientific formulas, experiments, or observations, it might be classified as Science, Math, Biology, Chemistry, or Physics, depending on the specific focus. If it contains literary analysis, poetry, or fiction, it might be classified as Literature. And so on.",
+        "prompt": "What was Stalin's Great Terror from 1937-1938?",
+        "answer": "Stalin's Great Terror was a campaign of political repression that led to a massive expansion of the Gulag system.",
+        "category": "The main subject category of the content is History.",
         "difficulty": "hard"
     }
 ]

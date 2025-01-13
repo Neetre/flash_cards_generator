@@ -50,9 +50,30 @@ def read_pdf(pdf_path):
         return None
 
 
+def pdfplumber_extract_text(pdf_path):
+    import pdfplumber
+    with pdfplumber.open(pdf_path) as pdf:
+        text = ""
+        for page in pdf.pages:
+            text += page.extract_text()
+        return text
+
+
 if __name__ == "__main__":
-    pdf_file_path = "../data/wwi_russia.pdf"  # Replace with the actual path
-    extracted_text = extract_text_from_image_pdf(pdf_file_path)
+
+    from pdf2image import convert_from_path
+    import pytesseract
+
+    # Convert PDF pages to images
+    images = convert_from_path("input/wwi_russia.pdf")
+
+    # Extract text from each image
+    for image in images:
+        text = pytesseract.image_to_string(image, lang='ita')  # Use 'ita' for Italian text
+        print(text)
+    '''
+    pdf_file_path = "input/wwi_russia.pdf"  # Replace with the actual path
+    extracted_text = pdfplumber_extract_text(pdf_file_path)
 
     if extracted_text:
         # Process the extracted text as needed
@@ -69,3 +90,4 @@ if __name__ == "__main__":
             print(f"Error writing to file: {e}")
     else:
         print("Failed to extract text from PDF.")
+    '''

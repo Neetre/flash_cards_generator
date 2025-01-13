@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Upload, Download, Loader } from 'lucide-react';
 import { Flashcard } from '../types';
@@ -19,6 +19,11 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [textPreview, setTextPreview] = useState<string>('');
   const { user } = useAuth();
+
+  useEffect(() => {
+    console.log('Updated flashcards:', flashcards);
+    console.log('Updated flashcards length:', flashcards.length);
+  }, [flashcards]);
 
   const validateFile = (selectedFile: File) => {
     if (selectedFile.size > MAX_FILE_SIZE) {
@@ -77,7 +82,10 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
         throw new Error('Upload failed');
       }
 
-      const generatedFlashcards: Flashcard[] = await response.json();
+      const responseData = await response.json();
+      const generatedFlashcards: Flashcard[] = responseData.flashcards;
+      console.log(generatedFlashcards)
+      console.log(generatedFlashcards.length)
       setFlashcards(generatedFlashcards);
       onFlashcardsReceived(generatedFlashcards);
       toast.success('Flashcards generated successfully!');

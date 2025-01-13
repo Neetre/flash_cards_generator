@@ -96,7 +96,7 @@ async def upload_file(document: UploadFile = File(...), language: str = Form(...
         file_type = "pdf" if document.content_type == "application/pdf" else "text"
         text = read_docs.read_document(file_type, document.filename)
         logging.info(f"Text extracted from {document.filename}:\n{text}")
-        generated_flashcards = analyze_docs.generate_flashcards(text, num_flashcards)
+        generated_flashcards = analyze_docs.generate_flashcards(text, num_flashcards, language)
         json_flashcards = analyze_docs.flashcards_to_json(generated_flashcards)
         logger.info(f"Generated flashcards: {json_flashcards}")
 

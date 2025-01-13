@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Flashcard } from '../types';
-import { ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight} from 'lucide-react';
 
 interface FlashcardListProps {
   flashcards: Flashcard[];
