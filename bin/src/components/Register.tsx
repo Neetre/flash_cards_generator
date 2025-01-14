@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound } from 'lucide-react';
 
-interface LoginProps {
-  onSwitchToRegister: () => void;
+interface RegisterProps {
+  onSwitchToLogin: () => void;
 }
 
-export function Login({ onSwitchToRegister }: LoginProps) {
+export function Register({ onSwitchToLogin }: RegisterProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export function Login({ onSwitchToRegister }: LoginProps) {
     setError('');
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/login', {
+      const response = await fetch('http://127.0.0.1:8000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,13 +26,13 @@ export function Login({ onSwitchToRegister }: LoginProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error('Registration failed');
       }
 
       const data = await response.json();
       login(data.token);
     } catch (err) {
-      setError('Invalid credentials');
+      setError('Registration failed. Please try again.');
     }
   };
 
@@ -44,7 +44,7 @@ export function Login({ onSwitchToRegister }: LoginProps) {
             <KeyRound className="h-6 w-6 text-blue-600" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Create a new account
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -80,16 +80,16 @@ export function Login({ onSwitchToRegister }: LoginProps) {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Sign in
+              Register
             </button>
           </div>
           <div className="text-center">
             <button
               type="button"
-              onClick={onSwitchToRegister}
+              onClick={onSwitchToLogin}
               className="text-sm text-blue-600 hover:text-blue-500"
             >
-              Don't have an account? Register
+              Already have an account? Login
             </button>
           </div>
         </form>

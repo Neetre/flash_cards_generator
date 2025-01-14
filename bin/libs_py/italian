@@ -2,31 +2,67 @@
     {
         "prompt": "What type of government was Imperial Russia?",
         "answer": "Imperial Russia was an autocratic empire.",
-        "category": "The main subject category of the content is History.",
+        "category": "History",
         "difficulty": "easy"
     },
     {
-        "prompt": "Who were the main groups that initiated the Russian Revolution of February 1917?",
-        "answer": "The revolution was initiated by women workers and supported by soldiers, the proletariat, and the Soviet.",
-        "category": "The main subject category of the content is History.",
+        "prompt": "Who was Rasputin and what did he predict?",
+        "answer": "Rasputin was a controversial figure close to the imperial family who predicted the end of the dynasty on December 30, 1916.",
+        "category": "History",
         "difficulty": "medium"
     },
     {
-        "prompt": "What was the significance of Lenin's 'April Theses'?",
-        "answer": "Lenin's 'April Theses' aimed for the overthrow of the provisional government, marking a crucial turning point in the revolution.",
-        "category": "The main subject category of the content is History.",
+        "prompt": "What triggered the February Revolution of 1917?",
+        "answer": "The February Revolution of 1917 began with women workers' protests, joined by soldiers, the proletariat, and Soviets.",
+        "category": "History",
         "difficulty": "medium"
     },
     {
-        "prompt": "What was the outcome of the October Revolution in 1917?",
-        "answer": "The October Revolution led by the Bolsheviks resulted in the establishment of the 'dictatorship of the proletariat', the CEKA, the Red Terror, and the Russian Civil War.",
-        "category": "The main subject category of the content is History.",
+        "prompt": "What was the role of Lenin in the October Revolution?",
+        "answer": "Lenin returned from exile in April 1917, proposing the overthrow of the Provisional Government, which took place on October 24-25, 1917, marking the beginning of the 'dictatorship of the proletariat' and the rise of the Bolsheviks.",
+        "category": "History",
         "difficulty": "hard"
     },
     {
-        "prompt": "What was Stalin's Great Terror from 1937-1938?",
-        "answer": "Stalin's Great Terror was a campaign of political repression that led to a massive expansion of the Gulag system.",
-        "category": "The main subject category of the content is History.",
+        "prompt": "What were the immediate consequences of the October Revolution?",
+        "answer": "The immediate consequences included the creation of the Cheka (political police), the start of the Red Terror, and the Russian Civil War.",
+        "category": "History",
+        "difficulty": "medium"
+    },
+    {
+        "prompt": "What was the Russian Socialist Federative Soviet Republic (RSFSR)?",
+        "answer": "The RSFSR was established on July 10, 1918, and was followed by the assassination of the royal family on July 16-17, 1918.",
+        "category": "History",
+        "difficulty": "medium"
+    },
+    {
+        "prompt": "What were the main policies of War Communism?",
+        "answer": "War Communism policies included the abolition of private property, state control of the economy, and grain requisition from peasants.",
+        "category": "History",
+        "difficulty": "medium"
+    },
+    {
+        "prompt": "What was the New Economic Policy (NEP) and what led to the creation of Gulags?",
+        "answer": "The NEP was introduced in 1921 and led to the creation of Gulags.",
+        "category": "History",
+        "difficulty": "medium"
+    },
+    {
+        "prompt": "What were the main objectives under Stalin's rule (1924-1953)?",
+        "answer": "Under Stalin's rule, objectives included massive industrialization, collectivization of agriculture, and accelerated economic development.",
+        "category": "History",
+        "difficulty": "medium"
+    },
+    {
+        "prompt": "What were the consequences of Stalin's focus on heavy industries and collectivization?",
+        "answer": "The focus on heavy industries and collectivization led to low wages, intensive exploitation, and an authoritarian regime.",
+        "category": "History",
+        "difficulty": "hard"
+    },
+    {
+        "prompt": "What were kolkhozes and when were they established?",
+        "answer": "Kolkhozes were established in 1929, followed by massive Gulag expansion and the Great Terror (1937-1938).",
+        "category": "History",
         "difficulty": "hard"
     }
 ]

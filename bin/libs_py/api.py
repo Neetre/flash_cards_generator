@@ -77,6 +77,18 @@ async def login(user: User):
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@app.get("/register")
+async def register(user: User):
+    try:
+        if user.username == "admin" and user.password == "password":
+            return {"message": "Login successful"}
+        else:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     
 
 @app.post("/upload/")
@@ -99,6 +111,7 @@ async def upload_file(document: UploadFile = File(...), language: str = Form(...
         generated_flashcards = analyze_docs.generate_flashcards(text, num_flashcards, language)
         json_flashcards = analyze_docs.flashcards_to_json(generated_flashcards)
         logger.info(f"Generated flashcards: {json_flashcards}")
+        os.remove(f"input/{document.filename}")
 
         return {"flashcards": json_flashcards}
     except HTTPException as e:
