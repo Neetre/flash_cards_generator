@@ -4,13 +4,20 @@ from pathlib import Path
 from datetime import date
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from model import AnalyzeDocs, ReadDocs
+from security import Security
+
 from dotenv import load_dotenv
 load_dotenv()
+
+from data_manager import SQLiteDBManager
+manager = SQLiteDBManager()
+key = os.getenv("SECRET_KEY")
+
 
 if os.path.exists("../log") is False:
     os.mkdir("../log")
@@ -44,8 +51,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 class Config:
     MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
+
 
 @app.middleware("http")
 async def file_size_middleware(request: Request, call_next):
@@ -61,6 +70,12 @@ async def file_size_middleware(request: Request, call_next):
 
 class User(BaseModel):
     username: str
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    username: str
     password: str
 
 
@@ -68,21 +83,51 @@ analyze_docs = AnalyzeDocs()
 read_docs = ReadDocs()
 
 @app.post("/login")
-async def login(user: User):
+async def login(user: LoginRequest):
+    print("Received payload:", user.model_dump()) 
     try:
-        if user.username == "admin" and user.password == "password":
-            return {"message": "Login successful"}
-        else:
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+        if not user.username or not user.password:
+            raise HTTPException(
+                status_code=422,
+                detail="Username and password are required"
+            )
+
+        user_found = manager.fetch_user(user.username)
+        if not user_found:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found. Please register."
+            )
+        stored_encrypted_password = user_found[3]
+        if isinstance(stored_encrypted_password, str):
+            stored_encrypted_password = stored_encrypted_password.encode('utf-8')
+
+        if not Security.verify_password(user.password, stored_encrypted_password, key):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid credentials"
+            )
+
+        return {"message": "Login successful"}
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
-@app.get("/register")
+@app.post("/register")
 async def register(user: User):
     try:
-        if user.username == "admin" and user.password == "password":
+        if user.username is not None and user.email is not None and user.password is not None:
+            user_found = manager.fetch_user(user.username)
+            if user_found is not None:
+                return {"message": "User already exists. Please login."}
+            enc_pwd = Security.encrypt_password(user.password, key)
+            manager.insert_user(user.username, user.email, enc_pwd)
             return {"message": "Login successful"}
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -107,7 +152,6 @@ async def upload_file(document: UploadFile = File(...), language: str = Form(...
 
         file_type = "pdf" if document.content_type == "application/pdf" else "text"
         text = read_docs.read_document(file_type, document.filename)
-        logging.info(f"Text extracted from {document.filename}:\n{text}")
         generated_flashcards = analyze_docs.generate_flashcards(text, num_flashcards, language)
         json_flashcards = analyze_docs.flashcards_to_json(generated_flashcards)
         logger.info(f"Generated flashcards: {json_flashcards}")
@@ -118,19 +162,6 @@ async def upload_file(document: UploadFile = File(...), language: str = Form(...
         raise e
     except Exception as e:
         logger.error(f"Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@app.get("/download")
-async def download_file(file_name: str):
-    try:
-        file_path = Path(f"../output/{file_name}")
-        if file_path.exists():
-            return FileResponse(file_path)
-        else:
-            raise HTTPException(status_code=404, detail="File not found")
-    except Exception as e:
-        logger.error(f"Download error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 

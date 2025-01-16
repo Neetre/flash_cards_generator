@@ -1,7 +1,9 @@
 .venv/
+__pycache__/
 
 .env
 *.pdf
+*.db
 
 # Logs
 logs

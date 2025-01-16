@@ -7,7 +7,15 @@ from pypdf import PdfReader
 import pytesseract
 from pdf2image import convert_from_path
 import pytesseract
+import base64
+import google.generativeai as genai
 
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
+
+
+scanner_model = genai.GenerativeModel("gemini-1.5-flash")
 
 @dataclass
 class FlashCard:
@@ -63,7 +71,6 @@ Return the result as a JSON array of strings. Each string should be a key concep
             {"role": "user", "content": text}
         ]
         response = self.generate_with_groq(messages)
-        # print("Key points: ", response)
         try:
             return json.loads(response)
         except json.JSONDecodeError:
@@ -80,12 +87,12 @@ Return the result as a JSON array of strings. Each string should be a key concep
         """
         messages = [
             {"role": "system", "content": """Determine the main subject category of the content. 
-Choose from the following categories: History, Science, Math, Literature, Art, Technology, Biology, Chemistry, Physics, Geography.
-Return only the category name as a string."""},
+Choose from the following categories: History, Science, Math, Literature, Art, Technology, Biology, Chemistry, Physics, Geography or Other.
+Return only the category name as a string.
+"""},
             {"role": "user", "content": text}
         ]
         response = self.generate_with_groq(messages)
-        # print("Categorized content", response)
         return response
     
     def summarize_text(self, text: str) -> str:
@@ -103,7 +110,6 @@ Return the summary as a bullet-point list. Each bullet point should be concise a
             {"role": "user", "content": text}
         ]
         response = self.generate_with_groq(messages)
-        # print("Summarization: ", response)
         return response
         
     def generate_qa_pairs(self, summary: str) -> List[Dict[str, str]]:
@@ -122,7 +128,6 @@ The questions should be clear and the answers should be concise."""},
             {"role": "user", "content": summary}
         ]
         response = self.generate_with_groq(messages)
-        # print("QA generation: ", response)
         try:
             response = response.strip()
             if not response.startswith('['):
@@ -145,14 +150,11 @@ The questions should be clear and the answers should be concise."""},
         """
         if self.target_language.lower() == "english":
             return content
-
-        messages = [
-            {"role": "system", "content": f"""Translate the following text to {self.target_language}. 
-Maintain any technical terms and ensure the translation is appropriate for a school context. 
-Return only the translated text."""},
-            {"role": "user", "content": content}
-        ]
-        result = self.generate_with_groq(messages)
+        print(f"Translating content to {self.target_language}...")
+        translate_model=genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=f"Translate the following text to {self.target_language}. Return only the translated text.")
+        result = translate_model.generate_content(content).text
         return result
 
     def process_document(self, text: str, num_cards: int = 3) -> List[FlashCard]:
@@ -165,7 +167,6 @@ Return only the translated text."""},
         Returns:
             List[FlashCard]: A list of FlashCard objects.
         """
-        # print("Raw text before categorize: ", text)
         category = self.categorize_content(text)
         summary = self.summarize_text(text)
         key_concepts = self.extract_key_concepts(text)
@@ -180,28 +181,32 @@ The questions should be clear and the answers should be concise."""},
         ]
         
         response = self.generate_with_groq(messages)
-        # print(response)
         try:
             qa_pairs = json.loads(response)
         except json.JSONDecodeError:
             return []
 
-        flash_cards = []
         try:
-            for qa in qa_pairs:
-                translated_q = self.translate_content(qa['question'])
-                translated_a = self.translate_content(qa['answer'])
+            combined_content = '\n'.join([" ".join([qa['question'], qa['answer']]) for qa in qa_pairs])
+            translated_content = self.translate_content(combined_content).split('\n')
+        except Exception as e:
+            print(f"Error translating content: {str(e)}")
+            translated_content = [qa['question'] for qa in qa_pairs] + [qa['answer'] for qa in qa_pairs]
+        try:
+            flash_cards = []
+            for i, qa in enumerate(qa_pairs[:num_cards]):
+                translated_q, translated_a = translated_content[i].split('? ', 1)
 
                 card = FlashCard(
-                    prompt=translated_q,
+                    prompt=translated_q+'?',
                     answer=translated_a,
                     category=category,
                     difficulty=qa.get('difficulty', 'medium')
                 )
                 flash_cards.append(card)
         except Exception as e:
-            print(f"Error while creating flashcards: {e}")
-            return []
+            print(f"Error creating flash cards: {str(e)}")
+            flash_cards = []
         return flash_cards
 
     def save_flashcards(self, cards: List[FlashCard], filename: str):
@@ -245,7 +250,7 @@ The questions should be clear and the answers should be concise."""},
             cards.append(card)
         return cards
 
-    def generate_flashcards(self, text: str, num_cards: int = 3, save_to: str = None, language: str = None) -> List[FlashCard]:
+    def generate_flashcards(self, text: str, num_cards: int = 3, language: str = None, save_to: str = None) -> List[FlashCard]:
         """Generate flash cards from text content.
         
         Args:
@@ -300,6 +305,22 @@ The questions should be clear and the answers should be concise."""},
 class ReadDocs:
     def __init__(self, data_dir="input"):
         self.data_dir = data_dir
+
+    def read_pdf_with_gemini(self, file_path: str) -> str:
+        """Read text content from a PDF file using the Gemini API.
+        
+        Args:
+            file_path (str): The path to the PDF file.
+            language (str): The language of the text.
+        
+        Returns:
+            str: The text content of the PDF.
+        """
+        with open(file_path, "rb") as doc_file:
+            doc_data = base64.standard_b64encode(doc_file.read()).decode("utf-8")
+        prompt = "Extract the content from the PDF document."
+        response = scanner_model.generate_content([{'mime_type': 'application/pdf', 'data': doc_data}, prompt])
+        return response.text
 
     def read_pdf(self, file_path: str, lang: str = "eng") -> str:
         """Read text content from a PDF file.
