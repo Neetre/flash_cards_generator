@@ -84,7 +84,7 @@ read_docs = ReadDocs()
 
 @app.post("/login")
 async def login(user: LoginRequest):
-    print("Received payload:", user.model_dump()) 
+    # print("Received payload:", user.model_dump()) 
     try:
         if not user.username or not user.password:
             raise HTTPException(

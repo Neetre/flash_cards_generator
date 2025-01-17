@@ -3,7 +3,6 @@ import json
 from typing import List, Dict, Optional
 from dataclasses import dataclass
 from groq import Groq
-from pypdf import PdfReader
 import pytesseract
 from pdf2image import convert_from_path
 import pytesseract
@@ -156,6 +155,20 @@ The questions should be clear and the answers should be concise."""},
             system_instruction=f"Translate the following text to {self.target_language}. Return only the translated text.")
         result = translate_model.generate_content(content).text
         return result
+
+    def create_lesson(self, text):
+        """Create a lesson from text content.
+        
+        Args:
+            text (str): The text content to create a lesson from.
+        
+        Returns:
+            str: The lesson content.
+        """
+        lesson_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction="Create a lesson from the following text. Return the lesson content.")
+        return lesson_model.generate_content(text).text
 
     def process_document(self, text: str, num_cards: int = 3) -> List[FlashCard]:
         """Process document and generate flash cards with difficulty levels and categories.

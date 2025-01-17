@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from security import Security
 from dotenv import load_dotenv
 load_dotenv()
 KEY = os.getenv("SECRET_KEY")
@@ -54,6 +55,45 @@ class SQLiteDBManager:
         self.cursor.execute("DELETE FROM users WHERE username= ?", (username,))
         self.conn.commit()
 
+    # Flashcard table
+    def create_flashcard_table(self):
+        """Create a table for flashcards."""
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS flashcards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                category TEXT NOT NULL,
+                difficulty TEXT NOT NULL,
+                user TEXT NOT NULL,
+                FOREIGN KEY(user) REFERENCES users(username)
+            )
+        ''')
+        self.conn.commit()
+
+    def insert_flashcard(self, question, answer, category, difficulty, user):
+        """Insert a new flashcard into the flashcards table."""
+        if self.check_duplicate_flashcard(question, user):
+            return False
+        self.cursor.execute('''
+            INSERT INTO flashcards (question, answer, category, difficulty, user)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (question, answer, category, difficulty, user))
+        self.conn.commit()
+
+    def check_duplicate_flashcard(self, question, user):
+        self.cursor.execute("SELECT * FROM flashcards WHERE question= ? AND user= ?", (question, user))
+        return self.cursor.fetchone()
+
+    def fetch_all_flashcards(self):
+        """Fetch all flashcards from the flashcards table."""
+        self.cursor.execute('SELECT * FROM flashcards')
+        return self.cursor.fetchall()
+    
+    def fetch_flashcards_by_user(self, user: str):
+        self.cursor.execute(f"SELECT * FROM flashcards WHERE user= ?", (user,))
+        return self.cursor.fetchall()
+
     def close(self):
         """Close the database connection."""
         if self.conn:
@@ -69,10 +109,10 @@ if __name__ == "__main__":
     for user in users:
         print(user)
 
-    # db_manager.remove_user("test_user")
-    # db_manager.insert_user("test_user", "pippo@gmail.com", "T@stP@ssw0rd")
+    # db_manager.remove_user("admin")
+    # db_manager.insert_user("admin", "admin@gmail.com", "a")
 
-    # enc_pwd = Security.encrypt_password("T@stP@ssw0rd", KEY).decode("utf-8")
-    # db_manager.insert_user("test_user", "test@gmail.com", enc_pwd)
+    # enc_pwd = Security.encrypt_password("a", KEY).decode("utf-8")
+    # db_manager.insert_user("admin", "admin@gmail.com", enc_pwd)
 
     db_manager.close()
