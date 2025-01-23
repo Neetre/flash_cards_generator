@@ -91,6 +91,7 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
       toast.success('Flashcards generated successfully!');
     } catch (err) {
       setError('Failed to upload document');
+      console.error(err);
       toast.error('Failed to generate flashcards');
     } finally {
       setUploading(false);
