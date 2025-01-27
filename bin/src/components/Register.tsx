@@ -34,7 +34,6 @@ export function Register({ onSwitchToLogin }: RegisterProps) {
       login(data.token);
     } catch (err) {
       setError('Registration failed. Please try again.');
-      console.error(err);
     }
   };
 

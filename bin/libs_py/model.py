@@ -8,13 +8,12 @@ from pdf2image import convert_from_path
 import pytesseract
 import base64
 import google.generativeai as genai
+import time
+from openai import OpenAI
 
+scanner_model = genai.GenerativeModel("gemini-1.5-pro")
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
-
-
-scanner_model = genai.GenerativeModel("gemini-1.5-flash")
+# DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 @dataclass
 class FlashCard:
@@ -28,6 +27,7 @@ class AnalyzeDocs:
     def __init__(self, target_language="english", model="mixtral-8x7b-32768"):
         self.target_language = target_language.lower()
         self.model = model
+        # self.client_deepseek =  OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
         self.client_groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
         if not os.getenv("GROQ_API_KEY"):
             raise ValueError("GROQ_API_KEY environment variable not set")
@@ -64,15 +64,16 @@ class AnalyzeDocs:
         Returns:
             List[str]: A list of key concepts and terminology.
         """
-        messages = [
-            {"role": "system", "content": """Extract key concepts and terminology from the text. 
-Return the result as a JSON array of strings. Each string should be a key concept or term."""},
-            {"role": "user", "content": text}
-        ]
-        response = self.generate_with_groq(messages)
+        key_concepts_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction="""Extract key concepts and terminology from the text. 
+Return the result as a JSON array of strings. Each string should be a key concept or term."""
+        )
+        
         try:
+            response = key_concepts_model.generate_content(text).text
             return json.loads(response)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, Exception):
             return []
 
     def categorize_content(self, text: str) -> str:
@@ -84,15 +85,19 @@ Return the result as a JSON array of strings. Each string should be a key concep
         Returns:
             str: The category name.
         """
-        messages = [
-            {"role": "system", "content": """Determine the main subject category of the content. 
-Choose from the following categories: History, Science, Math, Literature, Art, Technology, Biology, Chemistry, Physics, Geography or Other.
-Return only the category name as a string.
-"""},
-            {"role": "user", "content": text}
-        ]
-        response = self.generate_with_groq(messages)
-        return response
+        category_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction="""Determine the main subject category of the content. 
+Choose from the following categories: "History", "Science", "Math", "Literature", "Art", "Technology", "Biology", "Chemistry", "Physics", "Geography" or "Other".
+Return only the category name as a string."""
+        )
+        
+        try:
+            response = category_model.generate_content(text).text
+            return response.strip()
+        except Exception as e:
+            print(f"Error categorizing content: {str(e)}")
+            return "Other"
     
     def summarize_text(self, text: str) -> str:
         """Summarize long text into key points.
@@ -103,13 +108,18 @@ Return only the category name as a string.
         Returns:
             str: The summarized text.
         """
-        messages = [
-            {"role": "system", "content": """Summarize the following text into key points. 
-Return the summary as a bullet-point list. Each bullet point should be concise and capture a main idea."""},
-            {"role": "user", "content": text}
-        ]
-        response = self.generate_with_groq(messages)
-        return response
+        summary_model = genai.GenerativeModel(
+            model_name="gemini-1.5-pro",
+            system_instruction="""Summarize the following text into key points. 
+Return the summary as a bullet-point list. Each bullet point should be concise and capture a main idea."""
+        )
+        
+        try:
+            response = summary_model.generate_content(text).text
+            return response
+        except Exception as e:
+            print(f"Error summarizing text: {str(e)}")
+            return text
         
     def generate_qa_pairs(self, summary: str) -> List[Dict[str, str]]:
         """Generate relevant Q&A pairs from the summary.
@@ -120,14 +130,15 @@ Return the summary as a bullet-point list. Each bullet point should be concise a
         Returns:
             List[Dict[str, str]]: A list of question-answer pairs.
         """
-        messages = [
-            {"role": "system", "content": """Generate 3 relevant question-answer pairs from this text. 
+        qa_model = genai.GenerativeModel(
+            model_name="gemini-1.5-pro",
+            system_instruction="""Generate 3 relevant question-answer pairs from this text. 
 Return the result as a JSON array. Each object in the array should have 'question' and 'answer' fields. 
-The questions should be clear and the answers should be concise."""},
-            {"role": "user", "content": summary}
-        ]
-        response = self.generate_with_groq(messages)
+The questions should be clear and the answers should be concise."""
+        )
+        
         try:
+            response = qa_model.generate_content(summary).text
             response = response.strip()
             if not response.startswith('['):
                 response = response[response.find('['):]
@@ -166,7 +177,7 @@ The questions should be clear and the answers should be concise."""},
             str: The lesson content.
         """
         lesson_model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-1.5-pro",
             system_instruction="Create a lesson from the following text. Return the lesson content.")
         return lesson_model.generate_content(text).text
 
@@ -181,8 +192,11 @@ The questions should be clear and the answers should be concise."""},
             List[FlashCard]: A list of FlashCard objects.
         """
         category = self.categorize_content(text)
+        time.sleep(2)
         summary = self.summarize_text(text)
+        time.sleep(1)
         key_concepts = self.extract_key_concepts(text)
+        time.sleep(2)
 
         messages = [
             {"role": "system", "content": f"""Generate {num_cards} flash cards based on the following text. 
@@ -198,7 +212,7 @@ The questions should be clear and the answers should be concise."""},
             qa_pairs = json.loads(response)
         except json.JSONDecodeError:
             return []
-
+        time.sleep(2)
         try:
             combined_content = '\n'.join([" ".join([qa['question'], qa['answer']]) for qa in qa_pairs])
             translated_content = self.translate_content(combined_content).split('\n')

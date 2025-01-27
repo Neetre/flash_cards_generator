@@ -27,7 +27,7 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
 
   const validateFile = (selectedFile: File) => {
     if (selectedFile.size > MAX_FILE_SIZE) {
-      setError('File size must be less than 10MB');
+      setError('File size must be less than 100MB');
       return false;
     }
     if (selectedFile.type !== 'application/pdf' && selectedFile.type !== 'text/plain') {
@@ -84,14 +84,16 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
 
       const responseData = await response.json();
       const generatedFlashcards: Flashcard[] = responseData.flashcards;
-      console.log(generatedFlashcards)
-      console.log(generatedFlashcards.length)
+      // console.log(generatedFlashcards)
+      // console.log(generatedFlashcards.length)
+      if (generatedFlashcards.length === 0) {
+        throw new Error('No flashcards generated');
+      }
       setFlashcards(generatedFlashcards);
       onFlashcardsReceived(generatedFlashcards);
       toast.success('Flashcards generated successfully!');
     } catch (err) {
       setError('Failed to upload document');
-      console.error(err);
       toast.error('Failed to generate flashcards');
     } finally {
       setUploading(false);
@@ -146,7 +148,8 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
           )}
         </div>
         <h2 className="mt-4 text-2xl font-bold text-gray-900">Upload Document</h2>
-        <p className="mt-2 text-sm text-gray-600">Maximum file size: 5MB</p>
+        <p className="mt-2 text-sm text-gray-600">Maximum file size: 10MB</p>
+        <p className="mt-2 text-sm text-gray-600">It might take some time!</p>
       </div>
 
       {error && (
@@ -213,7 +216,7 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
             type="range"
             id="num-flashcards"
             min="1"
-            max="20"
+            max="10"
             value={numFlashcards}
             onChange={(e) => setNumFlashcards(Number(e.target.value))}
             className="w-full accent-blue-600"

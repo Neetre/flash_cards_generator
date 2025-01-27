@@ -6,6 +6,10 @@ This project consists of a flash card generator that allows the user to create a
 It all work by uploading a pdf or a txt file of plain text to the web interface and the system will generate the flash cards for you.
 Below the upload form, the user can see the flash cards generated and can click on them to see the answer.
 
+### NOTE
+
+For the registration part, the password must have at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.
+
 ## Requirements
 
 - Python 3.10

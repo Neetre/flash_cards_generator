@@ -33,7 +33,6 @@ export function Login({ onSwitchToRegister }: LoginProps) {
       login(data.token);
     } catch (err) {
       setError('Invalid credentials');
-      console.error(err);
     }
   };
 

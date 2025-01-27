@@ -18,24 +18,25 @@ from data_manager import SQLiteDBManager
 manager = SQLiteDBManager()
 key = os.getenv("SECRET_KEY")
 
-
-if os.path.exists("../log") is False:
-    os.mkdir("../log")
-
-if os.path.exists("../log/flash_cards.log") is False:
-    with open("../log/flash_cards.log", "w") as f:
-        f.write("")
+import google.generativeai as genai
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+genai.configure(api_key=GOOGLE_API_KEY)
 
 import logging
-logging.basicConfig(
-    filename="../log/flash_cards.log",
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
-Path("../log").mkdir(exist_ok=True)
-Path("../log/flash_cards.log").touch(exist_ok=True)
+try:
+    Path("../log").mkdir(parents=True, exist_ok=True)
+    Path("../log/flash_cards.log").touch(exist_ok=True)
+    logging.basicConfig(
+        filename="../log/flash_cards.log",
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logging.info("Logging configuration applied successfully.")
+    logger = logging.getLogger(__name__)
+    logger.debug("Logging configuration applied successfully.")
+except Exception as e:
+    print(f"Logging configuration failed: {e}")
 
 app = FastAPI(
     title="Flash Cards API",
@@ -47,11 +48,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://fc.figliolo.it"],
-    allow_credentials=True,
+    allow_origins=['*'],
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 class Config:
@@ -137,6 +136,7 @@ async def register(user: User):
         logger.error(f"Login error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
     
+Path("./input").mkdir(parents=True, exist_ok=True)
 
 @app.post("/upload/")
 async def upload_file(document: UploadFile = File(...), language: str = Form(...), num_flashcards: int = Form(...)) -> Dict[str, Any]:
@@ -150,13 +150,10 @@ async def upload_file(document: UploadFile = File(...), language: str = Form(...
         with open(f"input/{document.filename}", "wb") as f:
             f.write(file_content)
 
-        logger.info(f"File saved: {document.filename}")
-
         file_type = "pdf" if document.content_type == "application/pdf" else "text"
         text = read_docs.read_document(file_type, document.filename)
         generated_flashcards = analyze_docs.generate_flashcards(text, num_flashcards, language)
         json_flashcards = analyze_docs.flashcards_to_json(generated_flashcards)
-        logger.info(f"Generated flashcards: {json_flashcards}")
         os.remove(f"input/{document.filename}")
 
         return {"flashcards": json_flashcards}
