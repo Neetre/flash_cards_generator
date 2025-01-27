@@ -47,6 +47,9 @@ export function Register({ onSwitchToLogin }: RegisterProps) {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create a new account
           </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
