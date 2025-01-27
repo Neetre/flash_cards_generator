@@ -8,7 +8,7 @@ interface FileUploadProps {
   onFlashcardsReceived: (flashcards: Flashcard[]) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
@@ -27,7 +27,7 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
 
   const validateFile = (selectedFile: File) => {
     if (selectedFile.size > MAX_FILE_SIZE) {
-      setError('File size must be less than 5MB');
+      setError('File size must be less than 10MB');
       return false;
     }
     if (selectedFile.type !== 'application/pdf' && selectedFile.type !== 'text/plain') {
@@ -70,7 +70,7 @@ export function FileUpload({ onFlashcardsReceived }: FileUploadProps) {
     formData.append('num_flashcards', numFlashcards.toString());
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/upload', {
+      const response = await fetch('http://127.0.0.1:8001/upload', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${user.token}`,
